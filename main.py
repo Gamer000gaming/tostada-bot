@@ -21,6 +21,7 @@ data = {}
 ROLE_NAME = "uwu mod"
 URL_REGEX = re.compile(r"https?://\S+|www\.\S+")
 OWNER_USER_ID = 1123319890753896498
+BOT_TOKEN = "token"
 
 # persistence
 
@@ -651,4 +652,4 @@ async def untrust(interaction: discord.Interaction, target: discord.Member):
     await target.remove_roles(role, reason=f"Untrusted by {interaction.user}")
     await interaction.response.send_message(f"Removed {role.name} from {target.mention}")
 
-bot.run("token")
+bot.run(BOT_TOKEN)
