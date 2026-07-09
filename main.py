@@ -6,7 +6,7 @@ import re
 import json
 import os
 import time
-from deep_translator import GoogleTranslator
+import translatelib
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -21,6 +21,7 @@ data = {}
 ROLE_NAME = "uwu mod"
 URL_REGEX = re.compile(r"https?://\S+|www\.\S+")
 OWNER_USER_ID = 1123319890753896498
+BOT_TOKEN = "token"
 
 # persistence
 
@@ -553,7 +554,7 @@ async def ping(interaction: discord.Interaction):
 @bot.tree.command(name="translate", description="Translate text to another language")
 async def translate(interaction: discord.Interaction, lang: str, text: str):
     try:
-        translated = GoogleTranslator(source="auto", target=lang).translate(text)
+        translated = translatelib.translate(text, "auto", lang)
         await interaction.response.send_message(
             f"Translated to `{lang}`:\n{translated}"
         )
@@ -563,7 +564,7 @@ async def translate(interaction: discord.Interaction, lang: str, text: str):
             ephemeral=True
        )
 
-@bot.tree.command(name="translate_message", description="Translate a message from its Discord link")
+@bot.tree.command(name="translatemsg", description="Translate a message from its Discord link")
 async def translate_message(interaction: discord.Interaction, lang: str, message_link: str):
     try:
         # Split link into IDs
@@ -575,7 +576,7 @@ async def translate_message(interaction: discord.Interaction, lang: str, message
         channel = bot.get_channel(channel_id) or await bot.fetch_channel(channel_id)
         message = await channel.fetch_message(message_id)
 
-        translated = GoogleTranslator(source="auto", target=lang).translate(message.content)
+        translated = translatelib.translate(message.content, "auto", lang)
 
         await interaction.response.send_message(
             f"Original:\n{message.content}\n\nTranslated to `{lang}`:\n{translated}"
@@ -583,9 +584,26 @@ async def translate_message(interaction: discord.Interaction, lang: str, message
 
     except Exception as e:
         await interaction.response.send_message(
-            f"Could not translate that message: {e}",
+            f"An error occurred during translation: {e}",
             ephemeral=True
         )
+
+@bot.tree.command(name="hypertranslate", description="'Hypertranslate' text to another language")
+async def hypertranslate(interaction: discord.Interaction, text: str, lang: str, count: int):
+    try:
+        translated = translatelib.hypertranslate(text, "auto", lang, count)
+        path = ""
+        for pathitem in translated["path"]:
+            path += pathitem + " -> "
+        path = path.rstrip(" -> ") # remove trailing " -> "
+        await interaction.response.send_message(
+            f"Hypertranslated to `{lang}`:\n{translated["text"]}\n(`{path}`)"
+        )
+    except Exception as e:
+        await interaction.response.send_message(
+            f"Translation failed: {e}",
+            ephemeral=True
+       )
 
 async def get_or_create_role(guild: discord.Guild) -> discord.Role:
     role = discord.utils.get(guild.roles, name=ROLE_NAME)
@@ -624,4 +642,4 @@ async def untrust(interaction: discord.Interaction, target: discord.Member):
     await target.remove_roles(role, reason=f"Untrusted by {interaction.user}")
     await interaction.response.send_message(f"Removed {role.name} from {target.mention}")
 
-bot.run("token")
+bot.run(BOT_TOKEN)
