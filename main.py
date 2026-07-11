@@ -472,7 +472,7 @@ async def free(interaction: discord.Interaction, member: discord.Member):
 @app_commands.describe(member="User to toggle", mode="Transformation mode")
 @app_commands.choices(mode=mode_choices())
 async def uwulock(interaction: discord.Interaction, member: discord.Member, mode: str = "uwu"):
-    if not is_admin(interaction):
+    if not is_admin(interaction) and not member.id == interaction.user.id:
         return await interaction.response.send_message("No permission.", ephemeral=True)
 
     guild_data = get_guild(interaction.guild.id)
