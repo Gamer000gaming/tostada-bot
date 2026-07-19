@@ -92,9 +92,9 @@ def absolute_catgirl(text: str) -> str:
         "*paws at air*",
         "*rolls on floor*",
         "*tail swishes aggressively*",
-        "*boops your screen*",
+        "*boops  screen*",
         "*hides under blanket*",
-        "*pounces your sentence*"
+        "*pounces  sentence*"
     ]
 
     words = text.split()
@@ -361,7 +361,7 @@ async def guilds(
     interaction: discord.Interaction,
     guild_id: str | None = None
 ):
-    if interaction.user.id != YOUR_USER_ID:
+    if interaction.user.id != OWNER_USER_ID:
         await interaction.response.send_message(
             "You are not allowed to use this command.",
             ephemeral=True
@@ -435,12 +435,15 @@ async def guilds(
         ephemeral=True
     )
 
+self_uwulocked = []
+
 @bot.tree.command(name="free", description="Remove uwu effect from a user")
 @app_commands.describe(member="User to free")
 async def free(interaction: discord.Interaction, member: discord.Member):
-    if not is_admin(interaction):
-        return await interaction.response.send_message("No permission.", ephemeral=True)
-
+    if not is_admin(interaction) and not member.id == interaction.user.id:
+        if not interaction.user.id in self_uwulocked:
+            return await interaction.response.send_message("No permission.", ephemeral=True)
+        
     guild_data = get_guild(interaction.guild.id)
     uid = str(member.id)
 
@@ -458,7 +461,10 @@ async def free(interaction: discord.Interaction, member: discord.Member):
         if role.name.lower() == "uwued":
             await member.remove_roles(role)
             removed_roles.append(role.name)
-
+            
+    if interaction.user.id in self_uwulocked:
+        self_uwulocked.remove(interaction.user.id)
+        
     if deleted or removed_roles:
         await interaction.response.send_message(
             f"{member.display_name} has been freed ✨"
@@ -485,6 +491,8 @@ async def uwulock(interaction: discord.Interaction, member: discord.Member, mode
     else:
         users[uid] = {"expiry": float("inf"), "mode": mode}
         msg = f"Locked {member.display_name} with mode '{mode}'"
+        if  member.id == interaction.user.id and not interaction.user.id in self_uwulocked:
+            self_uwulocked.append(interaction.user.id)
 
     save_data()
     await interaction.response.send_message(msg)
@@ -597,7 +605,7 @@ async def hypertranslate(interaction: discord.Interaction, text: str, lang: str,
             path += pathitem + " -> "
         path = path.rstrip(" -> ") # remove trailing " -> "
         await interaction.response.send_message(
-            f"Hypertranslated to `{lang}`:\n{translated["text"]}\n(`{path}`)"
+            f"Hypertranslated to `{lang}`:\n{translated['text']}\n(`{path}`)"
         )
     except Exception as e:
         await interaction.response.send_message(
