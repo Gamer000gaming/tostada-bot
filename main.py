@@ -92,9 +92,9 @@ def absolute_catgirl(text: str) -> str:
         "*paws at air*",
         "*rolls on floor*",
         "*tail swishes aggressively*",
-        "*boops your screen*",
+        "*boops  screen*",
         "*hides under blanket*",
-        "*pounces your sentence*"
+        "*pounces  sentence*"
     ]
 
     words = text.split()
@@ -361,7 +361,7 @@ async def guilds(
     interaction: discord.Interaction,
     guild_id: str | None = None
 ):
-    if interaction.user.id != YOUR_USER_ID:
+    if interaction.user.id != OWNER_USER_ID:
         await interaction.response.send_message(
             "You are not allowed to use this command.",
             ephemeral=True
@@ -438,7 +438,7 @@ async def guilds(
 @bot.tree.command(name="free", description="Remove uwu effect from a user")
 @app_commands.describe(member="User to free")
 async def free(interaction: discord.Interaction, member: discord.Member):
-    if not is_admin(interaction):
+    if not is_admin(interaction) and not member.id == interaction.user.id:
         return await interaction.response.send_message("No permission.", ephemeral=True)
 
     guild_data = get_guild(interaction.guild.id)
@@ -597,7 +597,7 @@ async def hypertranslate(interaction: discord.Interaction, text: str, lang: str,
             path += pathitem + " -> "
         path = path.rstrip(" -> ") # remove trailing " -> "
         await interaction.response.send_message(
-            f"Hypertranslated to `{lang}`:\n{translated["text"]}\n(`{path}`)"
+            f"Hypertranslated to `{lang}`:\n{translated['text']}\n(`{path}`)"
         )
     except Exception as e:
         await interaction.response.send_message(
