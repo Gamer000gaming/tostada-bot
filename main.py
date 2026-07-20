@@ -486,6 +486,8 @@ async def uwulock(interaction: discord.Interaction, member: discord.Member, mode
     users = guild_data["users"]
 
     if uid in users:
+        if member.id == interaction.user.id and not interaction.user.id in self_uwulocked:
+            return await interaction.response.send_message("No permission.", ephemeral=True)
         del users[uid]
         msg = f"Unlocked {member.display_name}"
     else:
