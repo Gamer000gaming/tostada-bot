@@ -1,0 +1,4 @@
+discord_vr @ git+https://github.com/Orstando/discord_vr/
+translatelib @ git+https://github.com/Orstando/translatelib/
+discord.py
+dotenv
