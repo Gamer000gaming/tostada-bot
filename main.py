@@ -25,6 +25,7 @@ URL_REGEX = re.compile(r"https?://\S+|www\.\S+")
 load_dotenv()
 OWNER_USER_ID = os.getenv("OWNER_USER_ID")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+LOADING_EMOJI = "<a:loading:1534314472728956999>"
 
 # persistence
 
@@ -607,7 +608,7 @@ async def translate_message(interaction: discord.Interaction, lang: str, message
 async def hypertranslate_text(interaction: discord.Interaction, text: str, lang: str, count: int):
     channel = interaction.channel
     await interaction.response.send_message(
-        "<a:loading:1534314472728956999> Loading...",
+        f"{LOADING_EMOJI} Loading...",
         ephemeral=False
     )
     try:
