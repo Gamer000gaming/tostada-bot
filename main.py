@@ -25,6 +25,7 @@ URL_REGEX = re.compile(r"https?://\S+|www\.\S+")
 load_dotenv()
 OWNER_USER_ID = os.getenv("OWNER_USER_ID")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+LOADING_EMOJI = "<a:loading:1534314472728956999>"
 
 # persistence
 
@@ -67,6 +68,10 @@ def uwuify(text: str) -> str:
         word = re.sub(r"[RL]", "W", word)
         word = re.sub(r"n([aeiou])", r"ny\1", word)
         word = re.sub(r"N([aeiou])", r"Ny\1", word)
+        word = re.sub(r"u", "uwu", word)
+        word = re.sub(r"U", "UwU", word)
+        word = re.sub(r"o", "owo", word)
+        word = re.sub(r"O", "OwO", word)
 
         # stutter
         if random.random() < 0.13 and len(word) > 1:
@@ -113,6 +118,10 @@ def absolute_catgirl(text: str) -> str:
             word = re.sub(r"[RL]", "W", word)
             word = re.sub(r"n([aeiou])", r"ny\1", word)
             word = re.sub(r"N([aeiou])", r"Ny\1", word)
+            word = re.sub(r"u", "uwu", word)
+            word = re.sub(r"U", "UwU", word)
+            word = re.sub(r"o", "owo", word)
+            word = re.sub(r"O", "OwO", word)
 
             if len(word) > 2:
                 if random.random() < 0.18:
@@ -202,6 +211,9 @@ def stfu(text: str) -> str:
 def uwu_reverse(text):
     return reverse_mode(uwu_mode(text))
 
+def hypertranslate(text):
+    return translatelib.hypertranslate(text, "en", "en", 10)["text"]
+
 MODES = {
     "UwU": uwu_mode,
     "Absolute catgirl": absolute_catgirl,
@@ -211,6 +223,7 @@ MODES = {
     "stop yelling im scared :3": stopyelling,
     "stfu": stfu,
     "JACKPOT": uwu_reverse,
+    "hypertranslate": hypertranslate
 }
 
 # webhook
@@ -305,7 +318,7 @@ async def on_message(message: discord.Message):
         mode = users[uid].get("mode", "uwu")
     elif cid in channels:
         mode = channels[cid]
-    elif any(role.name.lower() == "uwued" for role in message.author.roles):
+    elif hasattr(message.author, 'roles') and any(role.name.lower() == "uwued" for role in message.author.roles):
         mode = "UwU"
 
     if not mode:
@@ -364,7 +377,7 @@ async def guilds(
     interaction: discord.Interaction,
     guild_id: str | None = None
 ):
-    if interaction.user.id != YOUR_USER_ID:
+    if interaction.user.id != OWNER_USER_ID:
         await interaction.response.send_message(
             "You are not allowed to use this command.",
             ephemeral=True
@@ -592,21 +605,22 @@ async def translate_message(interaction: discord.Interaction, lang: str, message
         )
 
 @bot.tree.command(name="hypertranslate", description="'Hypertranslate' text to another language")
-async def hypertranslate(interaction: discord.Interaction, text: str, lang: str, count: int):
+async def hypertranslate_text(interaction: discord.Interaction, text: str, lang: str, count: int):
+    channel = interaction.channel
+    await interaction.response.send_message(
+        f"{LOADING_EMOJI} Loading...",
+        ephemeral=False
+    )
     try:
         translated = translatelib.hypertranslate(text, "auto", lang, count)
         path = ""
         for pathitem in translated["path"]:
             path += pathitem + " -> "
         path = path.rstrip(" -> ") # remove trailing " -> "
-        await interaction.response.send_message(
-            f"Hypertranslated to `{lang}`:\n{translated["text"]}\n(`{path}`)"
-        )
+        await interaction.edit_original_response(content=f'Hypertranslated to `{lang}`:\n{translated["text"]}\n(`{path}`)')
+
     except Exception as e:
-        await interaction.response.send_message(
-            f"Translation failed: {e}",
-            ephemeral=True
-       )
+        await interaction.edit_original_response(content=f"An error occurred during translation: {e}")
 
 async def get_or_create_role(guild: discord.Guild) -> discord.Role:
     role = discord.utils.get(guild.roles, name=ROLE_NAME)
