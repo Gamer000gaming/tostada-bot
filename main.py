@@ -617,11 +617,10 @@ async def hypertranslate_text(interaction: discord.Interaction, text: str, lang:
         for pathitem in translated["path"]:
             path += pathitem + " -> "
         path = path.rstrip(" -> ") # remove trailing " -> "
-        print(f"Hypertranslated to `{lang}`:\n{translated["text"]}\n(`{path}`)")
-        await interaction.edit_original_response(content=f"Hypertranslated to `{lang}`:\n{translated["text"]}\n(`{path}`)")
+        await interaction.edit_original_response(content=f'Hypertranslated to `{lang}`:\n{translated["text"]}\n(`{path}`)')
 
     except Exception as e:
-        channel.send(f"Hypertranslated to `{lang}`:\n{translated["text"]}\n(`{path}`)")
+        await interaction.edit_original_response(content=f"An error occurred during translation: {e}")
 
 async def get_or_create_role(guild: discord.Guild) -> discord.Role:
     role = discord.utils.get(guild.roles, name=ROLE_NAME)
