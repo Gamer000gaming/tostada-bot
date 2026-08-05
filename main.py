@@ -68,10 +68,6 @@ def uwuify(text: str) -> str:
         word = re.sub(r"[RL]", "W", word)
         word = re.sub(r"n([aeiou])", r"ny\1", word)
         word = re.sub(r"N([aeiou])", r"Ny\1", word)
-        word = re.sub(r"u", "uwu", word)
-        word = re.sub(r"U", "UwU", word)
-        word = re.sub(r"o", "owo", word)
-        word = re.sub(r"O", "OwO", word)
 
         # stutter
         if random.random() < 0.13 and len(word) > 1:
@@ -118,10 +114,6 @@ def absolute_catgirl(text: str) -> str:
             word = re.sub(r"[RL]", "W", word)
             word = re.sub(r"n([aeiou])", r"ny\1", word)
             word = re.sub(r"N([aeiou])", r"Ny\1", word)
-            word = re.sub(r"u", "uwu", word)
-            word = re.sub(r"U", "UwU", word)
-            word = re.sub(r"o", "owo", word)
-            word = re.sub(r"O", "OwO", word)
 
             if len(word) > 2:
                 if random.random() < 0.18:
