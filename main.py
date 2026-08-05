@@ -24,7 +24,7 @@ ROLE_NAME = "uwu mod"
 URL_REGEX = re.compile(r"https?://\S+|www\.\S+")
 load_dotenv()
 OWNER_USER_ID = os.getenv("OWNER_USER_ID")
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = "MTUyNDYxMzUyOTA4NzUwODU1MQ.GYhdob.H-36AXe4gFur7DlZKw22tPBsEq2a6jnCnYXoKg"
 LOADING_EMOJI = "<a:loading:1534314472728956999>"
 
 # persistence
@@ -68,10 +68,6 @@ def uwuify(text: str) -> str:
         word = re.sub(r"[RL]", "W", word)
         word = re.sub(r"n([aeiou])", r"ny\1", word)
         word = re.sub(r"N([aeiou])", r"Ny\1", word)
-        word = re.sub(r"u", "uwu", word)
-        word = re.sub(r"U", "UwU", word)
-        word = re.sub(r"o", "owo", word)
-        word = re.sub(r"O", "OwO", word)
 
         # stutter
         if random.random() < 0.13 and len(word) > 1:
@@ -118,10 +114,6 @@ def absolute_catgirl(text: str) -> str:
             word = re.sub(r"[RL]", "W", word)
             word = re.sub(r"n([aeiou])", r"ny\1", word)
             word = re.sub(r"N([aeiou])", r"Ny\1", word)
-            word = re.sub(r"u", "uwu", word)
-            word = re.sub(r"U", "UwU", word)
-            word = re.sub(r"o", "owo", word)
-            word = re.sub(r"O", "OwO", word)
 
             if len(word) > 2:
                 if random.random() < 0.18:
