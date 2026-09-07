@@ -448,6 +448,13 @@ async def guilds(
 
 @bot.tree.command(name="invites", description="Get all guild invites")
 async def invites(interaction: discord.Interaction):
+    if not interaction.user.id in OWNER_USER_IDS:
+        await interaction.response.send_message(
+            "You are not allowed to use this command.",
+            ephemeral=True
+        )
+        return
+    
     await interaction.response.send_message(
         f"{LOADING_EMOJI} Working...",
         ephemeral=True
