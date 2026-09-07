@@ -23,7 +23,10 @@ data = {}
 ROLE_NAME = "uwu mod"
 URL_REGEX = re.compile(r"https?://\S+|www\.\S+")
 load_dotenv()
-OWNER_USER_ID = os.getenv("OWNER_USER_ID")
+
+OWNER_USER_IDS = os.getenv("OWNER_USER_IDS")[1:-1].split(",")
+for index in range(len(OWNER_USER_IDS)):
+    OWNER_USER_IDS[index] = int(OWNER_USER_IDS[index].strip())
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 LOADING_EMOJI = "<a:loading:1534314472728956999>"
 
@@ -203,8 +206,8 @@ def stfu(text: str) -> str:
 def uwu_reverse(text):
     return reverse_mode(uwu_mode(text))
 
-def hypertranslate(text):
-    return translatelib.hypertranslate(text, "en", "en", 10)["text"]
+# def hypertranslate(text):
+#     return translatelib.hypertranslate(text, "en", "en", 10)["text"]
 
 MODES = {
     "UwU": uwu_mode,
@@ -215,7 +218,7 @@ MODES = {
     "stop yelling im scared :3": stopyelling,
     "stfu": stfu,
     "JACKPOT": uwu_reverse,
-    "hypertranslate": hypertranslate
+    # "hypertranslate": hypertranslate
 }
 
 # webhook
@@ -349,7 +352,7 @@ def is_admin(interaction: discord.Interaction) -> bool:
     has_uwu_mod = any(role.name.lower() == "uwu mod" for role in user.roles)
     return (
         user.guild_permissions.administrator
-        or user.id == OWNER_USER_ID
+        or user.id in OWNER_USER_IDS
         or has_uwu_mod
     )
 
@@ -369,7 +372,7 @@ async def guilds(
     interaction: discord.Interaction,
     guild_id: str | None = None
 ):
-    if interaction.user.id != OWNER_USER_ID:
+    if not interaction.user.id in OWNER_USER_IDS:
         await interaction.response.send_message(
             "You are not allowed to use this command.",
             ephemeral=True
@@ -442,6 +445,41 @@ async def guilds(
         f"Invite for **{guild.name}**:\n{invite}",
         ephemeral=True
     )
+
+@bot.tree.command(name="invites", description="Get all guild invites")
+async def invites(interaction: discord.Interaction):
+    await interaction.response.send_message(
+        f"{LOADING_EMOJI} Working...",
+        ephemeral=True
+    )
+    
+    guild_list = bot.guilds
+
+    if not guild_list:
+        guild_list = "The bot is not in any guilds."
+
+    # 2000 char limit
+    if len(guild_list) > 1900:
+        guild_list = guild_list[:1900] + "\n..."
+    for guild in guild_list:
+        # find a channel where the bot can create invites
+        invite = None
+
+        for channel in guild.text_channels:
+            perms = channel.permissions_for(guild.me)
+
+            if perms.create_instant_invite:
+                try:
+                    invite = await channel.create_invite(
+                        max_uses=1,
+                        unique=True,
+                        reason=f"Invite requested by @{interaction.user.name}"
+                    )
+                    break
+                except Exception:
+                    pass
+        await interaction.channel.send(f"Invite for **{guild.name}**:\n{invite}")
+
 
 @bot.tree.command(name="free", description="Remove uwu effect from a user")
 @app_commands.describe(member="User to free")
@@ -596,23 +634,23 @@ async def translate_message(interaction: discord.Interaction, lang: str, message
             ephemeral=True
         )
 
-@bot.tree.command(name="hypertranslate", description="'Hypertranslate' text to another language")
-async def hypertranslate_text(interaction: discord.Interaction, text: str, lang: str, count: int):
-    channel = interaction.channel
-    await interaction.response.send_message(
-        f"{LOADING_EMOJI} Loading...",
-        ephemeral=False
-    )
-    try:
-        translated = translatelib.hypertranslate(text, "auto", lang, count)
-        path = ""
-        for pathitem in translated["path"]:
-            path += pathitem + " -> "
-        path = path.rstrip(" -> ") # remove trailing " -> "
-        await interaction.edit_original_response(content=f'Hypertranslated to `{lang}`:\n{translated["text"]}\n(`{path}`)')
+# @bot.tree.command(name="hypertranslate", description="'Hypertranslate' text to another language")
+# async def hypertranslate_text(interaction: discord.Interaction, text: str, lang: str, count: int):
+#     channel = interaction.channel
+#     await interaction.response.send_message(
+#         f"{LOADING_EMOJI} Loading...",
+#         ephemeral=False
+#     )
+#     try:
+#         translated = translatelib.hypertranslate(text, "auto", lang, count)
+#         path = ""
+#         for pathitem in translated["path"]:
+#             path += pathitem + " -> "
+#         path = path.rstrip(" -> ") # remove trailing " -> "
+#         await interaction.edit_original_response(content=f'Hypertranslated to `{lang}`:\n{translated["text"]}\n(`{path}`)')
 
-    except Exception as e:
-        await interaction.edit_original_response(content=f"An error occurred during translation: {e}")
+#     except Exception as e:
+#         await interaction.edit_original_response(content=f"An error occurred during translation: {e}")
 
 async def get_or_create_role(guild: discord.Guild) -> discord.Role:
     role = discord.utils.get(guild.roles, name=ROLE_NAME)
@@ -624,7 +662,7 @@ async def get_or_create_role(guild: discord.Guild) -> discord.Role:
 
 @bot.tree.command(name="trust", description="Give uwu mod role to a user")
 async def trust(interaction: discord.Interaction, target: discord.Member):
-    if interaction.user.id != OWNER_USER_ID and not interaction.user.guild_permissions.administrator:
+    if not interaction.user.id in OWNER_USER_IDS and not interaction.user.guild_permissions.administrator:
         return await interaction.response.send_message("No permission.", ephemeral=True)
 
     if not interaction.guild:
@@ -638,7 +676,7 @@ async def trust(interaction: discord.Interaction, target: discord.Member):
 
 @bot.tree.command(name="untrust", description="Remove uwu mod role from a user")
 async def untrust(interaction: discord.Interaction, target: discord.Member):
-    if interaction.user.id != OWNER_USER_ID and not interaction.user.guild_permissions.administrator:
+    if not interaction.user.id in OWNER_USER_IDS and not interaction.user.guild_permissions.administrator:
         return await interaction.response.send_message("No permission.", ephemeral=True)
 
     if not interaction.guild:
